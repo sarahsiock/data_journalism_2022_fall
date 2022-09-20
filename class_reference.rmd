@@ -20,9 +20,26 @@ knitr::opts_chunk$set(echo = TRUE)
 Consider this a personal guide to the commands and functions you will learn. In general, when you come across an R command or function that you want to remember, put it in here along with a description of what it does and when you'd use it.
 
 
-## Things I Learned on Jan. 27
+## Codes to remember 
 
-The command to set a working directory is setwd(). For example:
+Head: shows first few rows
+Summary: Summary of data
+Colnames:name of columns
+Glimpse: to get a sense of the data, some of the values in each field/variable/column, and the data types of each
+ To get percent: select(office, district, name_raw, party, jurisdiction, election_day, votes) %>% 
+  mutate(
+  percent_election_day = (election_day/votes)*100
+  case_when: Each line is basically a filter followed by `~` and then a value for the new column for records that match that filter
+  maryland_winred_categories <- maryland_winred %>%
+  mutate(
+    amount_category = case_when(
+        amount < 100 ~ "Less than $100",
+        amount >= 100 & amount <= 500 ~ "Between $100 and $500",
+        amount > 500 & amount <= 2900 ~ "Between $501 and $2900",
+        amount > 2900 ~ "More than $2,900"
+      )
+  )
+head(maryland_winred_categories)
 
 ```{r}
 setwd("~/Documents/GitHub/data_journalism_2022_spring")
@@ -33,7 +50,8 @@ install.packages("tidyverse")
 library(tidyverse)
 ```
 
-
+### Intersting Packages
+Lubridate: Make Dealing with Dates a Little Easier. Functions to work with date-times and time-spans: fast and user friendly parsing of date-time data, extraction and updating of components of a date-time (years, months, days, hours, minutes, and seconds), algebraic manipulation on date-time and time-span objects.
 ### Summarizing
 
 I need to use group_by and summariz. Here's an example of grouping by county and calculating counts, sum and other descriptive statistics.
