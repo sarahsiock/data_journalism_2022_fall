@@ -55,7 +55,7 @@ wv_winred_contribs %>%
 ```
 
 Q2. Which West Virginia donors made the most contributions of less than $10? You'll need to use a combination of columns to get unique donors.  
-A2. Rev. Dr John Almond with 293 contribs
+A2. Rev. Dr John Almond made the most contributions under 10 at 293.
 
 ```{r}
 wv_winred_contribs %>%
