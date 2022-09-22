@@ -1,0 +1,98 @@
+---
+title: "lab_02"
+author: "derek willis"
+date: "8/09/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load libraries and establish settings
+```{r}
+# Turn off scientific notation
+options(scipen=999)
+
+# Load the tidyverse. If you have not installed the tidyverse already, remove the # from the next line and run it first.  
+install.packages('tidyverse')
+library(tidyverse)
+library(lubridate)
+```
+
+## Load Data
+
+Let's keep working with the slice of WinRed contribution data from West Virginia.  
+
+```{r}
+wv_winred_contribs <- read_rds("data/lab_02.rds")
+```
+
+## Examine Data
+
+## Answer questions
+
+**Q1** Create a new column that divides the contribution amounts into the following options - less than $10, $10-$25, $26-$50, $51_$100, $101-$500, $501 and up - and calculates how many contributions are in each group. How would you describe the distribution of contributions in a sentence?
+A1. The least amount of people contributed more than $500 while the most contirbtued between $10 and $25. 
+
+
+
+```{r}
+wv_winred_contribs %>%
+  mutate(
+    amount_category = case_when(
+        amount < 10 ~ "Less than $10",
+        amount >= 10 & amount < 26 ~ "Between $10 and $25",
+        amount >= 26 & amount < 51 ~ "Between $26 and $50",
+        amount >= 51 & amount < 101 ~ "Between $51 and $100",
+        amount >= 101 & amount < 501 ~ "Between $101 and $500",
+        amount > 501 ~ "More than $501"
+    )
+  ) %>%
+  group_by(amount_category) %>%
+  summarise(
+    count_contribs = n())
+```
+
+Q2. Which West Virginia donors made the most contributions of less than $10? You'll need to use a combination of columns to get unique donors.  
+A2. Rev. Dr John Almond with 293 contribs
+
+```{r}
+wv_winred_contribs %>%
+  mutate(
+    amount_category = case_when(
+        amount < 10 ~ "Less than $10",
+        amount >= 10 & amount < 26 ~ "Between $10 and $25",
+        amount >= 26 & amount < 51 ~ "Between $26 and $50",
+        amount >= 51 & amount < 101 ~ "Between $51 and $100",
+        amount >= 101 & amount < 501 ~ "Between $101 and $500",
+        amount > 501 ~ "More than $501")) %>%
+  filter(amount < "Less than $10") %>% 
+  group_by(last_name, first_name, address_one) %>%
+  summarise(
+    count_contribs = n())%>%
+arrange(desc(count_contribs))
+```
+
+Q3. What questions do the results of Q2 raise in your mind? How could you use the data to explore them? No code here, just your questions.
+A3. I would be curious to see if people who live near each other contributed. For example, did a lot of people in the same neighborhood donate? Additionally, more group by functions could be used to find out more about which individuals were more likely to contribute, such as zip code and occupations. I.E. Are doctors more likely to contribute?
+
+Q4. Which month saw the most contributions?
+A4. June, $4,636
+
+```{r}
+wv_winred_contribs %>%
+  mutate(month = floor_date(date, "month")) %>%
+  group_by(month) %>%
+  summarise(count_contribs = n()) %>%
+  arrange(desc(count_contribs))
+```
+
+Q5. How many contributions of $2,900 - the individual maximum donation - were there, and who did they go to? How many of the recipients are from West Virginia? Do some googling to find out.
+A5. Six contributions were at $2,900. Carol, Palazzo and Zinke were the recipients. Carol and McKinley are the two from West Virginia. Carol received three $2,900 donations and McKinley received one. 
+
+```{r}
+wv_winred_contribs %>% 
+filter(amount == 2900) %>% 
+select(last_name, first_name, address_one,memo_text,amount)
+```

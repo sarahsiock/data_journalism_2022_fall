@@ -22,6 +22,7 @@ Consider this a personal guide to the commands and functions you will learn. In 
 
 ## Codes to remember 
 
+command shift m for and then
 Head: shows first few rows
 Summary: Summary of data
 Colnames:name of columns
