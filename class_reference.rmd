@@ -21,12 +21,56 @@ Consider this a personal guide to the commands and functions you will learn. In 
 
 
 ## Codes to remember 
+cleaned_conowingo %>% 
+  get_dupes(): duplicate rows
 
 command shift m for and then
+
+cleaned_conowingo <- conowingo %>%
+  clean_names(): standardizes columns
+  cleaned_conowingo <- conowingo %>%
+  clean_names() %>% 
+  rename(linenumber = x1_linenumber) (adds x in front of column thats starts with an number)
+  
+True:???
+
+as.numeric:
+
 Head: shows first few rows
-Summary: Summary of data
+
+Summary: adds new column, use after group by, used for counting, used for caculations
+
+mutate:adds new column to clean data, does not do any math
+
+guess_max: guess data types on first 10 rows
+
 Colnames:name of columns
+
 Glimpse: to get a sense of the data, some of the values in each field/variable/column, and the data types of each
+
+# cleaning function
+cleaned_conowingo <- conowingo %>%
+  clean_names() %>% 
+  rename(linenumber = x1_linenumber) %>% 
+  mutate(amount = as.numeric(amount)) %>% 
+  distinct(): gets rid of duplicate rows
+# display the cleaned dataset
+cleaned_conowingo
+
+cleaned_conowingo <- conowingo %>%
+  clean_names() %>% 
+  rename(linenumber = x1_linenumber) %>% 
+  mutate(amount = as.numeric(amount)) %>% 
+  distinct() %>%
+  mutate(zip = str_sub(zip, start=1L, end=5L)) :standardizes zip code
+  
+
+  mutate(city = str_to_title(city)) :first letter uppercase
+  
+   mutate(city = case_when(
+    str_detect(city,"^Conowing") ~ "Conowingo",
+    TRUE ~ city : fixes misspellings
+  
  To get percent: select(office, district, name_raw, party, jurisdiction, election_day, votes) %>% 
   mutate(
   percent_election_day = (election_day/votes)*100
