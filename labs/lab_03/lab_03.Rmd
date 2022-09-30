@@ -152,7 +152,7 @@ summarise(count_contribs = n(),
 
 ```
 ```{r}
-md_house_contribs %>% filter(contributor_name == "TRONE, DAVID")
+md_house_contribs %>% filter(contributor_name == "TRONE, DAVID") 
 
 
 
