@@ -115,7 +115,7 @@ maryland_population_with_voters_and_demographics %>%
 
 ### Task 11: Asking Demographic Questions
 **Task** Now let's find the county with the highest 18+ Asian population as a percentage of all population 18 and over and also the percentage of Democrats in that county. How do these results compare to the previous task? Put your answers below.
-**Answer** Howard County has the highest 18 plus population at 19%. Of the 18 plus population 52% are democrats.
+**Answer** Howard County has the highest 18 Asian plus population at 19%. Of the 18 plus population 52% are democrats.
 
 ```{r}
 maryland_population_with_voters_and_demographics %>%
