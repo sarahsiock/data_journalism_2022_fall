@@ -21,6 +21,7 @@ Consider this a personal guide to the commands and functions you will learn. In 
 
 
 ## Codes to remember 
+bind_rows(list(- combines multiple datasets. 
 cleaned_conowingo %>% 
   get_dupes(): duplicate rows
 
@@ -32,7 +33,7 @@ cleaned_conowingo <- conowingo %>%
   clean_names() %>% 
   rename(linenumber = x1_linenumber) (adds x in front of column thats starts with an number)
   
-True:???
+True:keeps everything else the same
 
 as.numeric:
 
