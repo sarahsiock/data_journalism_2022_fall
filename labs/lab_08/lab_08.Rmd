@@ -1,0 +1,195 @@
+---
+title: "lab_09"
+author: "derek willis"
+date: "10/26/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load libraries and establish settings
+
+**Task** Create a codeblock and load appropriate packages and settings for this lab. We'll be making some charts and cleaning up data.
+
+```{r}
+# Turn off scientific notation
+options(scipen=999)
+
+# Load libraries
+library(tidyverse)
+library(janitor)
+```
+
+## Load data
+
+**Task** Create a codeblock and load the following data from the data folder:
+
+* Maryland active registered voters - `md_active_voters.csv`
+* Maryland absentee ballots sent and returned - `md_absentee_ballots.csv`
+
+You may want to clean up the column names and standardize the names of counties so that they appear identical in the two dataframes.
+
+```{r}
+#load md_active_voters.csv`
+
+md_active_voter <- read_csv("data/md_active_voters.csv")
+
+#load md_absentee_ballots.csv
+md_absentee_ballots <- read_csv("data/md_absentee_ballots.csv")
+
+#cleaning
+md_active_voter <- md_active_voter %>% clean_names()
+
+md_absentee_ballots <- md_absentee_ballots %>% clean_names()
+
+```
+
+## Questions 
+
+**Q1.** Which county has the highest percentage of total absentee ballots returned of total ballots sent? Make a bar chart of the top 10 counties. Your bar chart must have:
+
+* A clear title that states the main idea/finding
+* Good labels for the x & y axis and a caption for the source, which is the Maryland State Board of Elections
+* Readable bars - the values shouldn't be overlapping
+
+**A1.** Worcester
+
+```{r}
+#county with the highest percentage of total absentee ballots
+percent_returned <- md_absentee_ballots %>% mutate(perc_absentee= (total_received)/(total_sent)*100) %>%  arrange(desc(perc_absentee)) %>% head(10)
+
+#Bar chart of top 10
+percent_returned %>%
+  ggplot() +
+  geom_bar(aes(x=reorder(county_name, perc_absentee), weight=perc_absentee)) +
+  coord_flip()+labs(
+    title="Maryland Counties with Highest Percent of Absentee Ballots Returned",
+    x = "county",
+    y = "percent returned",
+    caption = "source: Maryland State Board of Elections"
+    
+  )+theme_minimal()
+
+```
+
+**Q2.** What are the top 10 counties with the lowest percentage of ballots returned by Democratic voters, and what is the difference between the percentage returned for Democrats and Republicans in those counties? You MUST do the following things when answering this question:
+
+* Make a codeblock below to write your code in.
+* Calculate the percentage of ballots returned by both Democrats and Republicans.
+* Arrange the dataframe to show the counties with the smallest percentage of returned ballots from Democrats first.
+* Use ggplot to make a horizontal bar chart that shows just the first 10 counties, with the length of the bar determined by the county's percentage of ballots returned by Democrats. Give it an appropriate title, source, and x and y axis titles. 
+
+**A2.** 
+- What are the top 10 counties with the lowest percentage of ballots returned by Democratic voters? MONTGOMERY, PRINCE GEORGE'S,ANNE ARUNDEl, BALTIMORE CITY, HOWARD,	FREDERICK,CHARLES, HARFORD,SAINT MARY'S, BALTIMORE COUNTY
+-what is the difference between the percentage returned for Democrats and Republicans in those counties?
+-0.8836199, 2.5611313, 2.4259335, 5.7795931, 1.0250530, 2.1558454, 0.0180978, 1.0695917,3.9647203, 5.7795931
+
+  
+```{r}
+#Top 10 counties with the lowest percentage of ballots returned by Democratic
+dem_percent <- md_absentee_ballots %>% mutate(perc_dem = (dem_received)/(dem_sent)*100) %>%  arrange((perc_dem)) 
+
+dem_percent_10 <- md_absentee_ballots %>% mutate(perc_dem = (dem_received)/(dem_sent)*100) %>%  arrange((perc_dem)) %>% head(10)
+#Top 10 counties with the lowest percentage of ballots returned by Republicans
+rep_percent <-  md_absentee_ballots %>% mutate(perc_rep = (rep_received)/(rep_sent)*100) %>%  arrange((perc_rep))
+
+#compare percentages
+dem_and_republican <- dem_percent %>% inner_join(rep_percent, by="county_name") %>% head(10) %>% mutate(difference = perc_dem - perc_rep)
+
+#bar chart with the smallest percentage of returned ballots from Democrats first
+dem_percent_10  %>% 
+  ggplot() +
+  geom_bar(aes(x=reorder(county_name, perc_dem), weight=perc_dem)) +
+  coord_flip()+labs(
+    title="Ballots Returned by Democratic Voters",
+    x = "county",
+    y = "percent returned",
+    caption = "source: Maryland State Board of Elections"
+    
+  )+theme_minimal()
+```
+
+**Q3.**  A scatterplot is a type of chart that helps us see relationships between two variables. One variable goes on the x axis, the other on the y axis.  For each row/observation in our data, a scatterplot puts a circle (or a "point") where the two variables intersect on a grid. 
+
+Statisticians use scatterplots to show graphically whether one variable is correlated -- related, in a statistical sense -- with another variable.  A classic example is the [relationship between ice cream sales and temperature](https://www.mathsisfun.com/data/scatter-xy-plots.html). The scatterplot below -- press play to load the image -- shows that relationship, that an increase in temperature is associated with an increase in ice cream sales. When it's 12C, sales are 200 dollars, and when it's hotter, 25C, sales are 600 dollars.
+
+```{r}
+knitr::include_graphics("https://www.mathsisfun.com/data/images/scatter-ice-cream1.svg")
+```
+
+We're going to use a scatterplot a little differently, to get a visual sense of two key variables: 
+
+Our questions include: Does the percentage of returned ballots by younger voters vary depending on the percentage of younger residents? Are there differences in party and gender? Do certain counties have a higher number of younger voters casting ballots early?
+
+To answer those questions, do the following:
+
+1. Load in the early voting data here: https://elections.maryland.gov/press_room/2022_stats/GG22/EarlyVoting%20RAW%20data.csv and isolate the 18-24 age group.
+2. Create a dataframe adding up the total number of early votes cast, grouping by GEOID, county name and gender among 18-24 year-olds. To do this, you will need to make sure that all of the early voting totals for Days 1-6 DO NOT have NA values. You should change those values to 0 and exclude Day 7 and Day 8 entirely.
+3. Replace that dataframe with a version that uses `pivot_wider` to turn the gender values into columns (https://tidyr.tidyverse.org/reference/pivot_wider.html#ref-examples), rename the NA column to "UNK" and then replace any NAs in the gender columns with 0s using the same approach you used in step 2. Finally, calculate the total number of votes cast and the percentage of male and female early voters for each county.
+4. Make a scatterplot showing the percentage of early votes cast by gender in each county, with male and female on separate axes. I didn't show you how to do this, so look it up! Googling "ggplot scatterplot" is a good start.
+4. Give it an appropriate title, source, and x and y axis titles.
+5. Add a label for each point that shows the name of the county using geom_text(). Try to make the names as easy to read as possible - 
+6. In the answer space below, describe what you see and answer the questions posed above. In a general sense, what do you think this means? Feel free to consider the actual raw values: how would you report out the main point(s) of this chart?
+
+**A3.**
+Does the percentage of returned ballots by younger voters vary depending on the percentage of younger residents? Are there differences in party and gender? Do certain counties have a higher number of younger voters casting ballots early?
+
+How I would tackle these questions:
+
+
+To get the percentage of returned ballots by younger voters depending on the percentage of younger residents, I would need to look at the number of 18-24 in each county compared to the returned ballots. I could do this by using to mutate add up the totals from each day and then calculating the percent returned. For looking at differences in party and gender, I would need to divide the female and male columns by party code. First, I would need to use pivot_wider to split the party code into two columns of democrat and republican. Lastly, to get the number of younger voters casting ballots I would need to compare the number of 18-24 years to the returned ballots. This would require adding up the totals from each day, filtering for age and then calculating the percent returned.
+
+
+What I think about the scatterplot:
+Overall, not many people are voting early in Maryland. Additionally, gender does not play a huge role in who is voting early. However, there are a few outliers. For example, Dorchester has majority males voting early and somerset is majority female. Most points fall in the middle, meaning gender does not mean does not necessarily cause someone to vote. 
+
+```{r}
+#load in early voting data
+early_voting_raw <- read_csv("data/Early_Voting_RAW data.csv") %>% clean_names() 
+  
+early_voting_raw <- early_voting_raw %>% mutate(councilmanic_district_code = ifelse(is.na(councilmanic_district_code), 0, councilmanic_district_code), day1= ifelse(is.na(day1), 0, day1), day2= ifelse(is.na(day2), 0, day2),day3=ifelse(is.na(day3), 0, day3), day4= ifelse(is.na(day4), 0, day4), day5= ifelse(is.na(day5), 0, day5),day6= ifelse(is.na(day6), 0, day6), day7=ifelse(is.na(day7), 0, day7), day8= ifelse(is.na(day8), 0, day8))
+
+#total number of early votes cast, county name and gender among 18-24 year-olds
+total_votes <- early_voting_raw %>% mutate(total= day1 + day2+ day3+ day4+ day5+ day6)
+
+total_votes <- total_votes %>% group_by(county_name, age_group, gender_code) %>%  filter(age_group == 	
+"18-24") %>% summarise(total_of_votes = n())
+
+#`pivot_wider`
+total_votes <- total_votes %>% pivot_wider(names_from = gender_code, values_from = total_of_votes)
+
+#rename the NA column to "UNK" and then replace any NAs in the gender columns
+
+total_votes <- total_votes %>% rename(UNK = "NA")
+  
+  
+total_votes <- total_votes %>% mutate(UNK = ifelse(is.na(UNK), 0, UNK))
+
+
+ #calculate the total number of votes cast and the percentage of male and female early voters for each county
+total_votes <- total_votes %>%  mutate(total= F + M + UNK) 
+
+total_votes <- total_votes %>%  mutate(per_f = (F)/(total)*100) %>% mutate(per_m = (M)/(total)*100)
+
+
+
+```
+```{r}
+
+install.packages("ggrepel")
+library(ggrepel)
+library(ggplot2)
+
+#Make a scatterplot showing the percentage of early votes cast by gender in each county, with male and female on separate axes
+
+total_votes %>% 
+ggplot() +
+  geom_point(aes(x=per_f, y=per_m, size=total, color="red", label=county_name)) +
+geom_text_repel(aes(x=per_f, y=per_m, label=county_name))+ labs(title = "Young Male/Female Early Voting", x = "percent female",
+    y = " percent male",
+    caption = "source: Maryland State Board of Elections")
+
+```
+
