@@ -143,7 +143,7 @@ To get the percentage of returned ballots by younger voters depending on the per
 
 
 What I think about the scatterplot:
-Overall, not many people are voting early in Maryland. Additionally, gender does not play a huge role in who is voting early. However, there are a few outliers. For example, Dorchester has majority males voting early and somerset is majority female. Most points fall in the middle, meaning gender does not mean does not necessarily cause someone to vote. 
+Overall, not many people are voting early in Maryland. Additionally, gender does not play a huge role in who is voting early. However, there are a few outliers. For example, Dorchester has majority males voting early and somerset is majority female. Most points fall in the middle, meaning gender does not necessarily cause someone to be more likely to vote. 
 
 ```{r}
 #load in early voting data
