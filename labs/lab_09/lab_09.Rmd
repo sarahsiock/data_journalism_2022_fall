@@ -1,0 +1,160 @@
+---
+title: "lab_09"
+author: "Derek Willis"
+date: "11/09/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## You will need
+
+* the tidyverse, janitor and tigris libraries
+* you might choose to use the tidycensus library for Q4
+
+## Load libraries and establish settings
+
+**Task** Create a codeblock and load appropriate packages and settings for this lab.
+
+```{r}
+# Turn off scientific notation
+options(scipen=999)
+
+# Load libraries
+library(tidyverse)
+library(sf)
+library(janitor)
+library(tigris)
+library(tidycensus)
+
+```
+
+Let's explore the election results from last night and make some maps! 
+
+## Questions 
+
+**Q1.** Make a county-level map of Maryland's results for governor using `md_gov_county.csv` in the data folder, calculating the difference between Wes Moore's percentage of the total votes and Dan Cox's percentage of the total votes and displaying that percentage difference on the map. What is the story here, and what is the county with the most interesting results?
+
+**A1.**  
+Overall, Wes Moore received a larger percentage of the vote in counties with large populations like Prince George's, Montgomery and Baltimore. The races were closer in the middle of the state in counties such as Howard and Anne Arundel. It also appears Cox won more counties but with small populations like Somerset and Worcester. A story could center around why Cox won in the smaller counties and the political beliefs are of those who live in them. The story could also include why Moore does not have a larger reach across the entire state and did not connect with voters in smaller counties. 
+
+```{r}
+
+
+md_gov_counties <- read_csv("data/md_gov_county.csv")
+
+md_gov_counties <- md_gov_counties %>% clean_names()
+
+#adding column with total votes
+md_gov_counties <- md_gov_counties %>% mutate(total_votes= cox + moore + lashar + wallace + harding + write_ins)
+
+#calculate Wes Moore and Dan Cox's percentage of total votes
+md_gov_counties <- md_gov_counties %>% mutate(perc_cox = (cox)/(total_votes)*100) %>%  mutate(perc_moore = (moore)/(total_votes)*100)
+
+#difference
+md_gov_counties <- md_gov_counties %>% mutate(difference = perc_moore - perc_cox)
+
+
+```
+```{r}
+#making the map
+counties <- counties()
+
+glimpse(counties)
+
+md_counties <- counties %>%
+  filter(STATEFP == "24") %>% mutate(GEOID = as.numeric(GEOID))
+
+
+
+md_gov_counties_with_population <- inner_join(md_counties, md_gov_counties, by=c("GEOID"= "geoid"))
+
+  
+
+md_gov_counties_with_population %>% ggplot() +
+  geom_sf(data= md_gov_counties_with_population, aes(fill= difference))+
+  theme_minimal()
+
+
+
+```
+
+**Q2.** Make another map showing the difference between Dan Cox's county-level performance in 2022 and Larry Hogan's in 2018, using percentages to compare the two as you did in Q1. You can use the dataframe you initially loaded for Q1, and you'll need to load the 2018 governor results in the data folder and join them to it before proceeding. Are there any counties where Cox got a higher percentage than Hogan? How would you describe the map showing the Hogan-Cox difference?
+
+Also answer this: is a map the best way to present this data? What else could you make that might convey more information?
+
+**A2.** 
+
+There are no counties with a higher percentage for Cox than Hogan. The majority of the map is a darker shade of blue, meaning Cox and Hogan were close in many counties. However, toward the center of the state the map it is lighter blue, meaning Hogan has an even greater lead over Cox in this part of the state. Hogan greatly outperformed Cox in Baltimore and Anne Arundel. 
+
+I do not think a map is the best way to present this data. I think a chart listing each county with the percent cox received vs the percent Hogan would work better. Due to the many shades and colors on the graph, I do not believe readers would be able to quickly understand who performed better in each county.  
+
+
+```{r}
+md_gov_county_18 <- read_csv("data/md_gov_county_18.csv")
+
+#joining tables
+gov_race_18_and_22 <- inner_join(md_gov_counties_with_population , md_gov_county_18, by=c("GEOID"= "GEOID"))
+
+#percent Hogan 
+gov_race_18_and_22 <- gov_race_18_and_22 %>% mutate(perc_hogan = (Hogan)/(total_votes)*100)
+ 
+#Hogan vs Cox  
+gov_race_18_and_22 <- gov_race_18_and_22 %>% mutate(hogan_cox_diff = perc_hogan - perc_cox)
+   
+gov_race_18_and_22 %>%  select(perc_hogan, perc_cox)
+#making the map
+  gov_race_18_and_22  %>% ggplot() +
+  geom_sf(data=gov_race_18_and_22, aes(fill= hogan_cox_diff))+
+  theme_minimal()
+
+
+  
+
+```
+
+**Q3** Which county has the highest percentage of mail ballots remaining to be counted? Using the `mail_remaining.csv` file in the data folder, calculate the percentage of mail ballots remaining, then map a county map of those percentages. Looking at both the map and the data, are there counties where the candidate currently leading the governor's race could, in theory, change?
+
+**A3** 
+A majority of the map has 50% to 75% of mail in ballots yet to be counted. I suppose, in theory, the counties with 75% is yet to be counted the candidate for governor could change. Some of these counties includes Worcester, Somerset, Wicomico, Cecil and Talbot. 
+```{r}
+mail_remaining <- read_csv("data/mail_remaining.csv")
+
+#the percentage of mail ballots remaining
+mail_remaining <- mail_remaining %>% mutate(perc_remaining = (Remaining)/(Total_Returned)*100)
+  
+#join
+mail_remaining_population <-inner_join(md_gov_counties_with_population, mail_remaining, by=c("GEOID"= "GEOID"))
+  
+#making the map
+mail_remaining_population %>%  ggplot() +
+  geom_sf(data=mail_remaining_population, aes(fill= perc_remaining)) +
+  theme_minimal() + scale_fill_viridis_b(option="magma")
+```
+
+
+
+**Q4.** Choose your own map adventure! In the data folder I've included county-level results for several other 2022 contests, including the Comptroller, Attorney General and the marijuana legalization amendment. I've also added the 2020 presidential results by county. Using one of the 2022 races that we haven't already used and at least one other contest for comparison, make a county-level map showing what you think is the most interesting aspect of that data, and describe the results in terms of a possible story. You can bring in other data, such as Census information, if you like.
+
+**A4.** 
+While Trump did not win Maryland in the 2020 election, he did receive a higher percent of votes in every county than Cox did in 2022. The counties where the vote was closest between the two were Prince George's, Montgomery, Howard and Baltimore. The counties with the largest difference between the two are Garrett, Allegheny, Washington, Cecil and Caroline. Overall, Trump was a much popular candidate in Maryland than Cox was.I think this makes for an interesting story because Trump was a prominent supporter of Cox. However, this map shows that Trump's popularity did not translate to Cox receiving votes. There has also been much discussion over how Trump's endorsements influenced the 2022 election and this map provides insight into that conversation. 
+
+```{r}
+md_pres_county_20 <- read_csv("data/md_pres_county_20.csv")
+
+election_20_and_22 <- inner_join(md_gov_counties_with_population , md_pres_county_20,  by=c("GEOID"= "GEOID"))
+
+
+#Trump vs Cox
+election_20_and_22<- election_20_and_22 %>% mutate(perc_trump = (Trump)/(total_votes)*100)
+
+election_20_and_22 <- election_20_and_22 %>% mutate(trump_cox_diff = perc_trump - perc_cox)
+
+#map
+election_20_and_22 %>%  ggplot() +
+  geom_sf(data=election_20_and_22, aes(fill= trump_cox_diff)) +
+  theme_minimal() + scale_fill_viridis_b(option="magma")
+```
+-30-
