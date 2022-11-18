@@ -389,7 +389,7 @@ Let's repeat that for Unaffiliated voters:
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
 **Answer** 
-Noew there is a column for unaffialited voters per 10k people.
+Now there is a column for unaffiliated voters per 10k people.
 ```{r}
 md_voters_per_10k <- md_voters_per_10k %>% 
   mutate(una_voters_per_10k = UNA/population*10000)
