@@ -167,6 +167,7 @@ dates <- cardin_press_releases %>% html_elements('h5') %>% html_text() %>% as_ti
 title <- cardin_press_releases %>%  html_elements('h3') %>% html_text() %>% as_tibble()
 url <- cardin_press_releases %>% html_elements('h3 a') %>% html_attr('href')%>% 
 as_tibble() 
+
 #bindcolumns
 
 press_releases_combined <- bind_cols(dates, url, title)
