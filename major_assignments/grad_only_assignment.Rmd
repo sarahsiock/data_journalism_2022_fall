@@ -1,0 +1,22 @@
+---
+title: "grad_only_assignment"
+output: html_document
+date: "2022-11-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(janitor)
+library(lubridate)
+library(tidyverse)
+```
+Republican donors
+```{r}
+rep_contribs <- read_csv("data/rep_contribs.csv")
+
+file.exists("rep_contribs.csv")
+```
+

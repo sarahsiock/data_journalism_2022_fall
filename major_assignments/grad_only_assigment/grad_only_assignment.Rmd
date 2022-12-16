@@ -1,0 +1,484 @@
+---
+title: "grad_only_assignment"
+output: html_document
+date: "2022-11-21"
+---
+
+#How can you describe (broadly) the party’s donors? Where do the parties get their money and from what kinds of donors? Do they raise a lot in small amounts or from out of state donors?
+
+Reps:
+The Republican Committee received the most contributions in state at a total of $3,072,852.95. In total the party received $7,900,602 in contributions. Other states that contributed high amounts include DC, Maryland and Virginia. The top cities that gave the most contributions were Arlington, Raleigh and Charlotte. However, when looking at total dollar amounts Washington was the highest at $3,061,649, followed by Raleigh at $968,834.38 and Bethesda at $381,911.40.6,247 were from individuals and 2,968 were from	other committees. The most donations were between $101 and $500 at 2,171. The second most donations were between $10 and $25 at 2,107. The least amount of contributions were between $501 and $1,000 at 226. The majority of donors were retired. A few interesting top employers at the individual level were TWJ Farms (A farm in Nebraska) and Wells Fargo. 
+
+Dems:
+The Democratic Committee received the most contributions from DC at $5,732,950.29. Other states that contributed high amounts include North Carolina and New York. The cities with the most contributions were Raleigh, Durham and Chapel Hill. However, Washington also had the highest total dollar amount of donations at $5,732,854.04. Overall, the majority of donations were less than $10 at 3,379. The top employers were self-employed and retired. Some stand-out employers were Duke University, Imangi Studios and 27 City Square Consulting Inc. 
+ 
+
+#What did the party spend its money on? You may need OpenRefine to help you standardize the purpose of spending. Can you tell much about the strategy behind the spending from the data?
+
+Rep:
+Overall, the Republican Committee spent $6,495,216 over the year. Over the course of the year, the committee spent the most on payroll at $1,831,220.03. The next highest was EXEMPT VOLUNTEER MAILING at 777,036.31. The third highest was PAYROLL TAXES at 630,372.81. Another interesting expenditure was the balance owed for the 2021 NCGOP state convention at 40,000.00. Organizations that received significant funds from the committee are Political INK, which does direct mail for Republican campaigns, and ADP Easypay (a direct deposit company). 
+
+When looking at how expenses changed over time, after the primary election the party spent the most on exempt volunteer mailing at $777,0361.31. However, before the primary the committee spent the most on payroll at $1,152,108.15. Overall spending also decreased on payroll after the primary.
+
+A possible strategy for this spending could be targeting voters via mail closer to the midterm election, which is why the funds increased after the primary. 
+
+
+Dem:
+In total the Democratic Committee spent $6,580,343 with an average contribution amount of $3,854.917.The committee spent the most on payroll and mailers for Don Davis, a democratic state senator. The top recipients of their spending were The Paystub People (payroll company), Deliver Strategies LLC (a political strategy firm) and Blue Cross Blue Shield. Before the primary, the committee spent the most on payroll at $1,152,108.15 but after the primary, the top spending was for mailers at $972,444.50. The committee also increased spending on payroll after the primary.
+
+
+#When you compare the two parties, where are the differences and similarities?
+
+One of the major differences between the two parties is that Republicans received more contributions from in-state donors. Both groups spent the majority of their funds on payroll with Democrats increasing spending on payroll after the primary and  Overall, Democrats raised more money but in smaller amounts of contributions. Meanwhile, Republicans had a greater amount of larger donations. Both committees received funds from similar cities within North Carolina. The majority of the North Carolina cities that gave money to both committees were from wealthier or more populated parts of the state such a Chapel Hill, Raleigh and Charlotte.
+
+#What about either the donors or the spending prompts further questions from you?
+I would be interested to see how contributions from North Carolina cities have changed over time. Did the contributions from both parties always come cities that were similar? Or has it changed over time? 
+
+I also think it would be worth looking further into some of the employers of the contributors. For example, why is the same farm in Nebraska responsible for 27 contributions? 
+
+Another question: Is North Carolina unique compared to other states in receiving a lot of donations from out-of-state donors? 
+
+
+#Two visualizations
+https://datawrapper.dwcdn.net/fgJ7Y/1/
+https://datawrapper.dwcdn.net/0OyCJ/1/
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(janitor)
+library(lubridate)
+library(tidyverse)
+library(dplyr)
+library(tidycensus)
+```
+Republican Donors
+
+Findings:
+-The states that gave the most contributions are NC	at 4935, VA 2984, FL 180, CA 157 and TX 124
+-States whose who contributions total the most NC	at 3,072,852.95, DC 3,058,177.21, MD	3,82,544.10	and VA 342,818.31
+-The average contribution amount is $842.1022		
+-The sum of all contributions was $7,900,602	
+-Cities with the most contributions: ARLINGTON 2950, RALEIGH	422, CHARLOTTE 414. By total dollar amount WASHINGTON 3,061,649.71, RALEIGH	968,834.38, BETHESDA	3,81,911.40
+-6247	were from INDIVIDUAL and 2968 were from	OTHER COMMITTEE		
+
+
+```{r}
+rep_contribs_total <- read_csv("data/rep_total_contribs.csv") %>% clean_names()
+```
+
+```{r}
+#Where do the parties get their money and from what kinds of donors?
+
+#states with most contributions:  Do they raise a lot in small amounts or from out of state donors?
+
+rep_contribs_total %>% group_by(contributor_state) %>% summarise(count =n()) %>% arrange(desc(count))
+
+rep_contribs_total %>% group_by(contributor_state) %>% summarise(contribution_receipt_amount = sum(contribution_receipt_amount)) %>% arrange(desc(contribution_receipt_amount))
+
+#cities with most contributions
+rep_contribs_total %>% group_by(contributor_city) %>% summarise(count =n()) %>% arrange(desc(count))
+
+#dollar amount for cities
+rep_contribs_total %>% group_by(contributor_city) %>% summarise(total_amount = sum(contribution_receipt_amount)) %>% arrange(desc(total_amount))
+
+#average
+rep_contribs_total %>% summarise(mean(contribution_receipt_amount))
+```
+
+
+
+
+```{r}
+#sum
+rep_contribs_total %>% summarise(sum(contribution_receipt_amount))
+```
+
+
+```{r}
+#entity_type_desc
+rep_contribs_total %>% group_by(entity_type_desc) %>% summarise(count =n()) %>% arrange(desc(count))
+```
+
+
+
+Republican Donors cont:
+-The most donations were between $101 and $500 at 2,171. The second most donations were between $10 and $25 at 2,107. The least were between $501 and $1000 at 226	=. 
+-There were seven donations at $5,800 which is the max amount an individual can donate
+```{r}
+# Do they raise a lot in small amounts or from out of state donors?
+
+rep_contribs_total <- rep_contribs_total %>%
+  mutate(
+    amount_category = case_when(
+           contribution_receipt_amount < 10 ~ "Less than $10",
+         contribution_receipt_amount >= 10 &    contribution_receipt_amount < 26 ~ "Between $10 and $25",
+           contribution_receipt_amount >= 26 &    contribution_receipt_amount < 51 ~ "Between $26 and $50",
+          contribution_receipt_amount >= 51 &    contribution_receipt_amount < 101 ~ "Between $51 and $100",
+           contribution_receipt_amount >= 101 &    contribution_receipt_amount < 501 ~ "Between $101 and $500",
+          contribution_receipt_amount >= 501 & contribution_receipt_amount < 1000 ~ "Between $501 and $1000"  , contribution_receipt_amount >= 1000 ~ "More than $1000"
+    )
+  )
+rep_contribs_total %>% group_by(amount_category) %>%
+  summarise(
+    count_contribs = n()) %>% arrange(desc(count_contribs))
+
+ #highest amount one person can donates
+rep_contribs_total %>% 
+filter(contribution_receipt_amount == 5800) %>% 
+select(contributor_name, contributor_state,receipt_type_desc,contribution_receipt_amount)
+ 
+
+```
+Republican donors cont:
+-The majority of donors were retired at 3,348, followed by self employed at 545 and 178	. TWJ Farms (27), Wells Fargo (27) and Pinnacle (39)
+-For occupations retired was still the most at 	3,052 followed by owner at 	159 and attorney at 142. Other occupations in the top 10 of donors include homemaker and CEO.
+
+```{r}
+#What kinds of donors?
+rep_contribs_total %>% group_by(contributor_employer) %>% summarise(count =n()) %>% arrange(desc(count))
+
+rep_contribs_total %>% group_by(contributor_occupation) %>% summarise(count =n()) %>% arrange(desc(count))
+```
+Rep Contribs Cont:
+-When looking at just individuals the top employers by count are RETIRED 3348, SELF 545, SELF-EMPLOYED	178, STATE OF NC	51, PINNACLE	39, TWJ FARMS	27, WELLS FARGO	27.	
+-The top employers by amount RETIRED	885,624.62, SELF	402,422.86, SELF-EMPLOYED	163,734.75, INV	50,000.00, VARIETY WHOLESALERS	50,000.00
+-By occupation count: RETIRED	3,052, OWNER	159, ATTORNEY	142, REAL ESTATE	100	
+-Occupation amount: RETIRED	733956.95, CEO	301742.25, HOMEMAKER	214310.00, PRESIDENT	205950.00, OWNER	173065.00	
+
+
+```{r}
+#employer by individuals
+rep_contribs_total %>% filter(entity_type_desc == "INDIVIDUAL") %>% group_by(contributor_employer) %>% summarise(count =n()) %>% arrange(desc(count))
+
+rep_contribs_total %>% filter(entity_type_desc == "INDIVIDUAL") %>% group_by(contributor_employer) %>% summarise(total =sum(contribution_receipt_amount)) %>% arrange(desc(total))
+
+rep_contribs_total %>% filter(entity_type_desc == "INDIVIDUAL") %>%  group_by(contributor_occupation) %>% summarise(count =n()) %>% arrange(desc(count))
+
+rep_contribs_total %>% filter(entity_type_desc == "INDIVIDUAL") %>% group_by(contributor_occupation) %>% summarise(total =sum(contribution_receipt_amount)) %>% arrange(desc(total))
+```
+
+
+Rep spending: 
+-Total spent over the year $6,495,216	
+-The committee spent the most on payroll at 1,831,220.03. The next highest was EXEMPT VOLUNTEER MAILING at 777,036.31. The third highest was PAYROLL TAXES at 630,372.81. Other interesting expenditures was the balance owed for the 2021 NCGOP state convention at 40,000.00. 
+-The total spent on payroll was $1,831,220
+-Top entities:ORG	5429, IND	703, PTY	23
+```{r}
+#load in data
+rep_spending <- read_csv("data/rep_spending.csv")
+#total spending
+rep_spending %>% summarise(disbursement_total = sum(disbursement_amount))
+
+#What did the party spend its money on? 
+rep_spending %>% group_by(disbursement_description) %>% summarise(disbursement_amount = sum(disbursement_amount)) %>% arrange(desc(disbursement_amount))
+
+
+#total for payroll
+rep_spending %>% filter(disbursement_description == "PAYROLL") %>% group_by(disbursement_description,committee_name) %>% summarise(total_amount = sum(disbursement_amount)) %>% arrange(desc(total_amount))
+
+#entity type
+rep_spending %>%
+group_by(entity_type) %>% 
+count() %>% 
+arrange(desc(n))
+
+rep_spending %>%
+  filter(entity_type == "PTY") %>% 
+group_by(entity_type) %>% 
+count() %>% 
+arrange(desc(n))
+
+
+```
+Top for Republicans 
+POLITICAL INK, INC.	777036.31			
+ADP EASYPAY	667098.40			
+DOT THE I	309765.18	
+```{r}
+#recipient name
+
+rep_spending %>% group_by(recipient_name) %>% summarise(count =n()) %>% arrange(desc(count))
+
+rep_spending %>% group_by(recipient_name, disbursement_description) %>% summarise(disbursement_amount = sum(disbursement_amount)) %>% arrange(desc(disbursement_amount))
+```
+
+Rep spending cont: 
+
+-Spent the most money on payroll and mailers after primary through September 
+-total amount spent after primary 2,627,430	
+-After primary spent the most on EXEMPT VOLUNTEER MAILING at $777,036.31	
+-Before primary spent the most on Payroll at $1,152,108.15
+-Total spent before primary 3,838,413
+```{r}
+#spending after primary
+rep_spending %>% filter(disbursement_date >=("2022-05-17") & disbursement_date <= "2022-10-19") %>% group_by(disbursement_description) %>% summarise(total_amount = sum(disbursement_amount)) %>% arrange(desc(total_amount))
+
+#total amount spent after primary
+
+rep_spending %>% filter(disbursement_date >=("2022-05-17") & disbursement_date <= "2022-10-19") %>% summarise(total_amount = sum(disbursement_amount))
+
+#spending before primary
+rep_spending %>% filter(disbursement_date >=("2021-01-04") & disbursement_date <= "2022-05-16") %>% group_by(disbursement_description) %>% summarise(total_amount = sum(disbursement_amount)) %>% arrange(desc(total_amount))
+
+rep_spending %>% filter(disbursement_date >=("2021-01-04") & disbursement_date <= "2022-05-16") %>% summarise(total_amount = sum(disbursement_amount))
+
+
+```
+Rep spending cont:
+Findings:
+-Amount spent on payroll after primary: $675,452	
+-Amount spent on payroll before primary: $1,152,108	
+
+```{r}
+#spending over time for payroll
+rep_spending %>% filter(disbursement_description == "PAYROLL") %>% filter(disbursement_date >=("2022-05-17") & disbursement_date <= "2022-10-19") %>%  group_by(disbursement_description) %>% summarise(total_amount = sum(disbursement_amount)) %>% arrange(desc(total_amount))
+
+#before primary
+rep_spending %>% filter(disbursement_description == "PAYROLL") %>% filter(disbursement_date >=("2021-01-04") & disbursement_date <= "2022-05-16") %>%  group_by(disbursement_description) %>% summarise(total_amount = sum(disbursement_amount)) %>% arrange(desc(total_amount))
+```
+
+
+Democratic Party
+```{r}
+dem_contribs <- read_csv("data/dem_total_contribs.csv") %>% clean_names()
+
+```
+Dem Contribs:
+Findings:
+-Total contributions: 11,143,450	
+-Average donation: 1,327.233		
+-Top states by count: NC at 3183	, CA at 1295	and Ny at 509.
+-Top states by amount: DC at 5,732,950.29, NC	2,166,474.03	and NY at 1,381,653.24	
+-Top cities: Raleigh at 493, Durham at 387, Chapel hill at 380, Washington at 333. Washington has the highest dollar amount at 5,732,854.04	
+-Nine donations of $5,800, the highest amount
+-Top is individuals at 8061 and other committee at 134. 
+```{r}
+#total contributions
+
+dem_contribs %>% summarise(sum(contribution_receipt_amount))
+
+#average donation
+dem_contribs %>% summarise(mean(contribution_receipt_amount))
+
+#top entity type
+dem_contribs %>% group_by(entity_type_desc) %>% summarise(count =n()) %>% arrange(desc(count))
+
+#state and cities with the most contributions by count and total dollar amount
+
+dem_contribs %>% group_by(contributor_state) %>% summarise(count =n()) %>% arrange(desc(count))
+
+dem_contribs %>% group_by(contributor_state) %>% summarise(state_total = sum(contribution_receipt_amount)) %>% arrange(desc(state_total))
+
+dem_contribs %>% group_by(contributor_city) %>% summarise(count =n()) %>% arrange(desc(count))
+
+dem_contribs %>% group_by(contributor_city) %>% summarise(city_total = sum(contribution_receipt_amount)) %>% arrange(desc(city_total))
+
+#highest amount for individual donation
+ dem_contribs %>% 
+filter(contribution_receipt_amount == 5800) %>% 
+select(contributor_name, contributor_state,receipt_type_desc,contribution_receipt_amount)
+```
+Dem Contributions cont:
+Findings:
+-Lost of small donations most less than 10 at 3,379	
+```{r}
+#Type of donations
+dem_contribs <- dem_contribs %>%
+  mutate(
+    amount_category = case_when(
+           contribution_receipt_amount < 10 ~ "Less than $10",
+         contribution_receipt_amount >= 10 &    contribution_receipt_amount < 26 ~ "Between $10 and $25",
+           contribution_receipt_amount >= 26 &    contribution_receipt_amount < 51 ~ "Between $26 and $50",
+          contribution_receipt_amount >= 51 &    contribution_receipt_amount < 101 ~ "Between $51 and $100",
+           contribution_receipt_amount >= 101 &    contribution_receipt_amount < 501 ~ "Between $101 and $500",
+          contribution_receipt_amount >= 501 & contribution_receipt_amount < 1000 ~ "Between $501 and $1000"  , contribution_receipt_amount >= 1000 ~ "More than $1000"
+    )
+  )
+ dem_contribs %>% group_by(amount_category) %>%
+  summarise(
+    count_contribs = n()) %>% arrange(desc(count_contribs))
+```
+
+Dem contribs cont:
+Findings
+-Top employers:SELF-EMPLOYED	726, RETIRED	583	. Interesting Duke University at 112, IMANGI STUDIOS at 27, CITY SQUARE CONSULTING INC at 26.
+-Top occupations: NOT EMPLOYED at 3,643, RETIRED at 584, ATTORNEY at 350.
+
+By individual: 
+-Self employed:726
+-RETIRED: 583	
+-DUKE UNIVERSITY: 112
+
+```{r}
+#Employer breakdown
+
+# top employers
+dem_contribs %>% group_by(contributor_employer) %>% summarise(count =n()) %>% arrange(desc(count))
+
+
+dem_contribs %>% group_by(contributor_occupation) %>% summarise(count =n()) %>% arrange(desc(count))
+
+#individual
+dem_contribs %>% filter(entity_type_desc == "INDIVIDUAL") %>% group_by(contributor_employer) %>% summarise(count =n()) %>% arrange(desc(count))
+
+
+dem_contribs %>% filter(entity_type_desc == "INDIVIDUAL") %>% group_by(contributor_occupation) %>% summarise(count =n()) %>% arrange(desc(count))
+
+
+dem_contribs %>% filter(entity_type_desc == "INDIVIDUAL") %>% group_by(contributor_occupation) %>% summarise(total =sum(contribution_receipt_amount)) %>% arrange(desc(total))
+
+dem_contribs %>% filter(entity_type_desc == "INDIVIDUAL") %>% group_by(contributor_employer) %>% summarise(total =sum(contribution_receipt_amount)) %>% arrange(desc(total))
+
+```
+
+Dem Spending
+
+Findings:
+-total spending: $6,580,343	
+-Average amount: $3,854.917	
+-Spent most on Payroll, VOLUNTEER EXEMPT MAIL - DON DAVIS NC H 01 and payroll taxes
+-Most came from individuals and organizations
+```{r}
+#load in file
+dem_spending <- read_csv("data/dem_spending.csv") %>% clean_names()
+
+#total spending
+dem_spending %>% summarise(sum(disbursement_amount))
+
+#average expenditure
+
+dem_spending %>% summarise(mean(disbursement_amount))
+
+#entity type
+dem_spending %>% group_by(entity_type_desc) %>% summarise(count =n()) %>% arrange(desc(count))
+
+#spent most on by count
+dem_spending %>% group_by(disbursement_description) %>% summarise(count =n()) %>% arrange(desc(count))
+
+#spent most on by sum
+dem_spending %>% group_by(disbursement_description) %>% summarise(disbursement_total = sum(disbursement_amount)) %>% arrange(desc(disbursement_total))
+```
+Top recipients: 
+
+THE PAYSTUB PEOPLE	at 2403907.79		
+DELIVER STRATEGIES, LLC	at 787315.93		
+BLUE CROSS BLUE SHIELD OF NC	at 302782.71		
+MISSION CONTROL, INC. at	185128.57
+```{r}
+#recipient name
+
+dem_spending %>% group_by(recipient_name) %>% summarise(count =n()) %>% arrange(desc(count))
+
+dem_spending %>% group_by(recipient_name) %>% summarise(disbursement_amount = sum(disbursement_amount)) %>% arrange(desc(disbursement_amount))
+```
+
+Dem spending cont:
+Findings:
+-Spent most on payroll after the the primary on VOLUNTEER EXEMPT MAIL - DON DAVIS NC H 01	at $972,444.50	
+-Spent most on payroll before primary, increased mailers
+-Total spent on payroll after primary: 902,105.2	
+-Total spent on payroll before primary: 836,610.1	
+
+
+```{r}
+#spending after primary to midterm
+dem_spending %>% filter(disbursement_date >=("2022-05-17") & disbursement_date <= "2022-10-19") %>% group_by(disbursement_description) %>% summarise(total_amount = sum(disbursement_amount)) %>% arrange(desc(total_amount))
+
+#spending before primary
+
+rep_spending %>% filter(disbursement_date >=("2021-01-04") & disbursement_date <= "2022-05-16") %>% group_by(disbursement_description) %>% summarise(total_amount = sum(disbursement_amount)) %>% arrange(desc(total_amount))
+
+#payroll spending before and after primary
+dem_spending %>% filter(disbursement_description == "PAYROLL") %>% filter(disbursement_date >=("2022-05-17") & disbursement_date <= "2022-10-19") %>% group_by(disbursement_description) %>% summarise(total_amount = sum(disbursement_amount)) %>% arrange(desc(total_amount))
+
+dem_spending %>% filter(disbursement_description == "PAYROLL") %>% filter(disbursement_date >=("2021-01-04") & disbursement_date <= "2022-05-16") %>% group_by(disbursement_description) %>% summarise(total_amount = sum(disbursement_amount)) %>% arrange(desc(total_amount))
+
+
+```
+Ind: 1068
+Org: 598
+Com: 36
+
+```{r}
+#entity breakdown
+dem_spending %>%
+group_by(entity_type) %>% 
+count() %>% 
+arrange(desc(n))
+```
+#making graphic
+```{r}
+acs<-load_variables(2020,"acs5")
+```
+
+```{r}
+census_api_key("549950d36c22ff16455fe196bbbd01d63cfbe6cf", overwrite=TRUE)
+
+#income map rep
+zip_data <- get_acs(geography = "zcta",
+                       variables = c(income = "B01001_001"),
+                       state = "NC",
+                       year = 2019)
+
+rep_contribs_income <- rep_contribs_total %>% mutate(contributor_zip = str_sub(contributor_zip, 1, 5)) %>% group_by(contributor_zip) %>% summarise(total =sum(contribution_receipt_amount))
+
+
+
+
+rep_contribs_income<- left_join(zip_data, rep_contribs_income, by=c("GEOID"="contributor_zip"))
+
+rep_contribs_income <- rep_contribs_income %>% mutate_at(6, ~replace_na(.,0))
+
+
+write_csv(rep_contribs_income, "rep_contribs_income.csv")
+
+#income map dem
+
+dem_contribs_income <- dem_contribs %>% mutate(contributor_zip = str_sub(contributor_zip, 1, 5)) %>% group_by(contributor_zip) %>% summarise(total =sum(contribution_receipt_amount))
+
+
+
+dem_contribs_income <-left_join(zip_data, dem_contribs_income, by=c("GEOID" = "contributor_zip"))
+
+dem_contribs_income <- dem_contribs_income %>% mutate_at(6, ~replace_na(.,0))
+
+
+
+
+write_csv(dem_contribs_income, "dem_contribs_income.csv")
+
+```
+
+```{r}
+#table for Republican income
+rep <-rep_contribs_income %>% group_by(GEOID,estimate) %>% summarise(total = sum(total)) %>% arrange(desc(total))
+
+rep <- rep %>% mutate(party = "rep")
+
+#table for Dem income
+dem <- dem_contribs_income %>% group_by(GEOID,estimate) %>% summarise(total = sum(total)) %>% arrange(desc(total))
+
+dem <- dem %>% mutate(party = "dem")
+```
+```{r}
+rep_dem_contribs_income <- bind_rows(rep, dem)
+
+zip_tract_county <- read_csv("data/ZIP_COUNTY_122021.csv")
+
+zip_tract_county <- zip_tract_county %>% filter(usps_zip_pref_state == "NC")
+
+
+rep_dem_contribs_income <-left_join(rep_dem_contribs_income, zip_tract_county, by=c("GEOID" = "zip"))
+
+rep_dem_contribs_income %>%  filter(party == "rep") %>% group_by(usps_zip_pref_city, estimate, county) %>% summarise(total = sum(total)) %>% arrange(desc(total))
+
+```
+```{r}
+
+rep_dem_contribs_income %>% filter(party == "dem") %>% group_by(usps_zip_pref_city, estimate, county) %>% summarise(total = sum(total)) %>% arrange(desc(total))
+```
+
+
